@@ -3,44 +3,34 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ui import View, Select, Modal, TextInput
 import asyncio
-import discord
 import os
-from discord.ext import commands
 
-RODAPE_TEXTO = "NightShadow Â© | Todos os Direitos Reservados."
-RODAPE_ICONE = "https://cdn.discordapp.com/attachments/1344032026092900424/1344032107931897966/logo2.webp?ex=699d56b1&is=699c0531&hm=0ebb6d80238b833e4cdf354d3b78b0fa8764142673e4b147ea114177326bb3f2"
+RODAPE_TEXTO = "Drakion Call Â© | Todos os Direitos Reservados."
+RODAPE_ICONE = "https://cdn.discordapp.com/attachments/1482181421341872259/1482181591311581278/imagem.png"
 
 ID_CARGO_PERMISSAO = 1481089914522173520
 ID_CARGO_MEMBRO = 1481090300402204833
-ID_CATEGORIA_BF = 1482171487640223847
-ID_CATEGORIA_GERAL = 1482171487640223847
+ID_CATEGORIA_CALL = 1482171487640223847
 
-CARGOS_BYPASS_LIMITE = [1481089914522173520
+CARGOS_BYPASS_LIMITE = [
+    1481089914522173520
 ]
 
-CONFIG_BF = {
-    "titulo": "<a:zw_Fogovermelho:1317940153221906442> | Painel de Eventos",
+CONFIG_CALL = {
+    "titulo": "Painel de Calls",
     "descricao": (
-        "<a:zw_seta:1317963242261319802> | Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
-        "<:zx_SETA_PROX1:1387191596096946357> | Você pode escolher entre PVP, Trial, Leviathan ou Vulcão.\n"
-        "â—<:zx_SETA_PROX1:1387191596096946357> Caso queira jogar outro modo ou jogo, abra uma call de \"Jogando\".\n"
-        "<:zx_SETA_PROX1:1387191596096946357> | Se deseja conversar com outros membros, vÃ¡ para â ãƒ»criar-call.\n"
-        "â—<:zx_SETA_PROX1:1387191596096946357> Evite abrir chamadas para conversar ou escutar mÃºsica. Utilize o canal adequado.\n"
-        "<a:zw_seta:1317963242261319802> Evite criar muitas chamadas sem necessidade, pois isso pode resultar em puniÃ§Ãµes.\n"
-        "<a:zw_seta:1317963242261319802> Caso haja algum erro ou dÃºvida, entre em contato com o suporte."
-    ),
-    "cor": 0xFF0000, 
-    "imagem": "https://cdn.discordapp.com/attachments/1310596794287128656/1322470018444689529/standard_1.gif"
-}
-
-CONFIG_GERAL = {
-    "titulo": "<a:zw_Fogovermelho:1317940153221906442> | Painel Geral",
-    "descricao": (
-        "| Crie uma chamada geral ou de música com outros membros.\n"
-        "| Você pode escolher entre Criar chamada geral ou chamada de música.\n"
+        "Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
+        "Você pode escolher entre PVP, Trial, Leviathan ou Vulcão.\n"
+        "Caso queira jogar outro modo ou jogo, abra uma call de \"Jogando\".\n"
+        "Se deseja conversar com outros membros, vÃ¡ para â ãƒ»criar-call.\n"
+        "Evite abrir chamadas para conversar ou escutar mÃºsica. Utilize o canal adequado.\n"
+        "Evite criar muitas chamadas sem necessidade, pois isso pode resultar em puniÃ§Ãµes.\n"
+        "Caso haja algum erro ou dÃºvida, entre em contato com o suporte.\n"
+        "Crie uma chamada geral ou de música com outros membros.\n"
+        "Você pode escolher entre Criar chamada geral ou chamada de música.\n"
         "Caso precise de ajuda, entre em contato com o suporte."
     ),
-    "cor": 0xFF0000,
+    "cor": 0xFF0000, 
     "imagem": "https://cdn.discordapp.com/attachments/1310596794287128656/1322470018444689529/standard_1.gif"
 }
 
@@ -130,9 +120,11 @@ class EventCallView(discord.ui.View):
         self.bot_ref = bot_ref
 
     @discord.ui.select(
-        placeholder="Escolha um evento de Blox Fruits...",
+        placeholder="Escolha uma Call...",
         custom_id="v_final_bf",
         options=[
+            discord.SelectOption(label="Geral", emoji="🔊", value="Geral"),
+            discord.SelectOption(label="Música", emoji="🎶", value="Música"),
             discord.SelectOption(label="PVP", emoji="🥊", value="PVP"),
             discord.SelectOption(label="Trial", emoji="🌑", value="Trial"),
             discord.SelectOption(label="Leviathan", emoji="🐉", value="Leviathan"),
@@ -142,43 +134,17 @@ class EventCallView(discord.ui.View):
         ]
     )
     async def callback(self, interaction: discord.Interaction, select: discord.ui.Select):
-        view = View().add_item(ParticipantCountSelect(select.values[0], self.bot_ref, ID_CATEGORIA_BF))
+        view = View().add_item(ParticipantCountSelect(select.values[0], self.bot_ref, ID_CATEGORIA_CALL))
         await interaction.response.send_message(f"Vagas para **{select.values[0]}**?", view=view, ephemeral=True)
 
 class GeneralCallView(discord.ui.View):
     def __init__(self, bot_ref):
         super().__init__(timeout=None)
         self.bot_ref = bot_ref
-
-    @discord.ui.select(
-        placeholder="Escolha uma call geral...",
-        custom_id="v_final_gen",
-        options=[
-            discord.SelectOption(label="Geral", emoji="🔊", value="Geral"),
-            discord.SelectOption(label="Música", emoji="🎶", value="Música")
-        ]
-    )
-    async def callback(self, interaction: discord.Interaction, select: discord.ui.Select):
-        view = View().add_item(ParticipantCountSelect(select.values[0], self.bot_ref, ID_CATEGORIA_GERAL))
-        await interaction.response.send_message(f"Vagas para **{select.values[0]}**?", view=view, ephemeral=True)
-
-class ConfigPanelModal(Modal):
-    def __init__(self, panel_type, bot_ref):
-        self.panel_type = panel_type
-        self.bot_ref = bot_ref
-        super().__init__(title=f"Configurar Painel {panel_type}")
-        cfg = CONFIG_BF if panel_type == "BF" else CONFIG_GERAL
-        self.p_title = TextInput(label="Título", default=cfg["titulo"], required=True)
-        self.p_desc = TextInput(label="Descrição", default=cfg["descricao"], style=discord.TextStyle.paragraph, required=True)
-        self.p_image = TextInput(label="URL da Imagem/Gif", default=cfg["imagem"], required=False)
-        self.p_channel = TextInput(label="ID do Canal de Envio", placeholder="ID aqui", required=True)
-        self.add_item(self.p_title); self.add_item(self.p_desc); self.add_item(self.p_image); self.add_item(self.p_channel)
-
-    async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         try:
             target_channel = self.bot_ref.get_channel(int(self.p_channel.value.strip()))
-            cfg = CONFIG_BF if self.panel_type == "BF" else CONFIG_GERAL
+            cfg = CONFIG_CALL
             embed = discord.Embed(title=self.p_title.value, description=self.p_desc.value, color=cfg["cor"])
             if self.p_image.value: embed.set_image(url=self.p_image.value)
             embed.set_footer(text=RODAPE_TEXTO, icon_url=RODAPE_ICONE)
@@ -191,15 +157,15 @@ class SetupPanelView(discord.ui.View):
     def __init__(self, bot_ref):
         super().__init__(timeout=None)
         self.bot_ref = bot_ref
+        
+@discord.ui.button(label="Config Painel BF", style=discord.ButtonStyle.danger)
+async def bf(self, interaction: discord.Interaction, button):
+    await interaction.response.send_message("Painel BF configurado.", ephemeral=True)
 
-    @discord.ui.button(label="Config Painel BF", style=discord.ButtonStyle.danger)
-    async def bf(self, interaction: discord.Interaction, button):
-        await interaction.response.send_modal(ConfigPanelModal("BF", self.bot_ref))
-
-    @discord.ui.button(label="Config Painel Geral", style=discord.ButtonStyle.secondary)
-    async def geral(self, interaction: discord.Interaction, button):
-        await interaction.response.send_modal(ConfigPanelModal("Geral", self.bot_ref))
-
+@discord.ui.button(label="Config Painel Geral", style=discord.ButtonStyle.secondary)
+async def geral(self, interaction: discord.Interaction, button):
+    await interaction.response.send_message("Painel Geral configurado.", ephemeral=True)
+    
 class MyBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix='!', intents=intents)
