@@ -53,7 +53,6 @@ def get_channel_name(name):
     }
     return f"{prefixes.get(name, '🔊》')}{name}"
 
-
 class ParticipantCountSelect(Select):
 
     def __init__(self, event_name, bot):
@@ -77,47 +76,46 @@ class ParticipantCountSelect(Select):
             options=options
         )
 
-async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction):
 
-    await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)
 
-    if interaction.user.id in self.bot.user_calls:
-        return await interaction.followup.send(
-            "❌ Você já possui uma call ativa.",
-            ephemeral=True
+        if interaction.user.id in self.bot.user_calls:
+            return await interaction.followup.send(
+                "❌ Você já possui uma call ativa.",
+                ephemeral=True
+            )
+
+        limit = int(self.values[0])
+
+        category = interaction.guild.get_channel(ID_CATEGORIA_CALL)
+
+        role_membro = interaction.guild.get_role(ID_CARGO_MEMBRO)
+
+        overwrites = {
+            interaction.guild.default_role: discord.PermissionOverwrite(connect=True, speak=True),
+            role_membro: discord.PermissionOverwrite(connect=True, speak=True)
+        }
+
+        for cargo_id in CARGOS_BYPASS_LIMITE:
+            role = interaction.guild.get_role(cargo_id)
+            if role:
+                overwrites[role] = discord.PermissionOverwrite(connect=True, speak=True)
+
+        channel = await interaction.guild.create_voice_channel(
+            name=get_channel_name(self.event_name),
+            category=category,
+            user_limit=limit,
+            overwrites=overwrites
         )
 
-    limit = int(self.values[0])
+        self.bot.active_calls[channel.id] = interaction.user.id
+        self.bot.user_calls[interaction.user.id] = channel.id
 
-    category = interaction.guild.get_channel(ID_CATEGORIA_CALL)
-
-    role_membro = interaction.guild.get_role(ID_CARGO_MEMBRO)
-
-    overwrites = {
-        interaction.guild.default_role: discord.PermissionOverwrite(connect=True, speak=True),
-        role_membro: discord.PermissionOverwrite(connect=True, speak=True)
-    }
-
-    for cargo_id in CARGOS_BYPASS_LIMITE:
-        role = interaction.guild.get_role(cargo_id)
-        if role:
-            overwrites[role] = discord.PermissionOverwrite(connect=True, speak=True)
-
-    channel = await interaction.guild.create_voice_channel(
-        name=get_channel_name(self.event_name),
-        category=category,
-        user_limit=limit,
-        overwrites=overwrites
-    )
-
-    self.bot.active_calls[channel.id] = interaction.user.id
-    self.bot.user_calls[interaction.user.id] = channel.id
-
-    await interaction.followup.send(
-        f"✅ Call criada: {channel.mention}\nEntre em **15 segundos** ou ela será deletada.",
-        ephemeral=True
-    )
-    
+        await interaction.followup.send(
+            f"✅ Call criada: {channel.mention}\nEntre em **15 segundos** ou ela será deletada.",
+            ephemeral=True
+        )
         category = interaction.guild.get_channel(ID_CATEGORIA_CALL)
 
         role_membro = interaction.guild.get_role(ID_CARGO_MEMBRO)
