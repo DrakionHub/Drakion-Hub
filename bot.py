@@ -31,7 +31,7 @@ CONFIG_CALL = {
         "Caso precise de ajuda, entre em contato com o suporte."
     ),
     "cor": 0xFF0000, 
-    "imagem": "https://cdn.discordapp.com/attachments/1310596794287128656/1322470018444689529/standard_1.gif"
+    "imagem": "https://cdn.discordapp.com/attachments/1482181421341872259/1482192203093905410/imagem.png"
 }
 
 intents = discord.Intents.default()
@@ -141,7 +141,6 @@ class GeneralCallView(discord.ui.View):
     def __init__(self, bot_ref):
         super().__init__(timeout=None)
         self.bot_ref = bot_ref
-        await interaction.response.defer(ephemeral=True)
         try:
             target_channel = self.bot_ref.get_channel(int(self.p_channel.value.strip()))
             cfg = CONFIG_CALL
@@ -157,26 +156,20 @@ class SetupPanelView(discord.ui.View):
     def __init__(self, bot_ref):
         super().__init__(timeout=None)
         self.bot_ref = bot_ref
-        
-@discord.ui.button(label="Config Painel BF", style=discord.ButtonStyle.danger)
-async def bf(self, interaction: discord.Interaction, button):
-    await interaction.response.send_message("Painel BF configurado.", ephemeral=True)
 
-@discord.ui.button(label="Config Painel Geral", style=discord.ButtonStyle.secondary)
-async def geral(self, interaction: discord.Interaction, button):
-    await interaction.response.send_message("Painel Geral configurado.", ephemeral=True)
-    
+    @discord.ui.button(label="Config Painel BF", style=discord.ButtonStyle.danger)
+    async def bf(self, interaction: discord.Interaction, button):
+        await interaction.response.send_message("Painel BF configurado.", ephemeral=True)
+
+    @discord.ui.button(label="Config Painel Geral", style=discord.ButtonStyle.secondary)
+    async def geral(self, interaction: discord.Interaction, button):
+        await interaction.response.send_message("Painel Geral configurado.", ephemeral=True)
+        
 class MyBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix='!', intents=intents)
         self.active_calls = {} 
         self.user_calls = {}
-
-    async def setup_hook(self):
-        self.add_view(EventCallView(self))
-        self.add_view(GeneralCallView(self))
-        await self.tree.sync()
-        print(f"âœ… Online!")
 
 bot = MyBot()
 
