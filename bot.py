@@ -29,7 +29,7 @@ CONFIG_CALL = {
         ":question: ┃ Caso haja algum erro ou dúvida, contate o suporte."
     ),
     "cor": 0xFF0000,
-    "imagem": ""imagem": "https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png""
+    "imagem": "https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png"
 }
 
 intents = discord.Intents.default()
