@@ -7,12 +7,14 @@ import os
 RODAPE_TEXTO = "Drakion Call © | Todos os Direitos Reservados."
 RODAPE_ICONE = "https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
 
-ID_CARGO_PERMISSAO = 1481089914522173520
+ID_CARGO_PERMISSAO = 1482423776158154953
 ID_CARGO_MEMBRO = 1482425956466429973
 ID_CATEGORIA_CALL = 1482171487640223847
 
 CARGOS_BYPASS_LIMITE = [
-    1481089914522173520
+    1481089914522173520,
+    1482423776158154953,
+    1482425821460304144
 ]
 
 CONFIG_CALL = {
@@ -199,11 +201,10 @@ async def on_voice_state_update(member, before, after):
 @bot.tree.command(name="env_panel", description="Enviar painel de criação de calls")
 async def env_panel(interaction: discord.Interaction):
 
-    cargo = interaction.guild.get_role(ID_CARGO_PERMISSAO)
-
-    if cargo not in interaction.user.roles:
+    # 🔒 Verifica se tem o cargo permitido
+    if not any(role.id == ID_CARGO_PERMISSAO for role in interaction.user.roles):
         await interaction.response.send_message(
-            "❌ Você não tem permissão.",
+            "❌ Você não tem permissão para usar este comando.",
             ephemeral=True
         )
         return
