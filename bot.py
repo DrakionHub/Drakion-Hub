@@ -28,7 +28,6 @@ CONFIG_CALL = {
         ":hammer_pick: ┃ Evite abrir chamadas para conversar ou escutar musica. Utilize o canal adequado.\n"
         ":x: Evite ┃ criar muitas chamadas sem necessidade, pois isso pode resultar em punições.\n"
         ":question: ┃ Caso haja algum erro ou duvida, entre em contato com o suporte."
-    
     ),
     "cor": 0xFF0000,
     "imagem": "https://cdn.discordapp.com/attachments/1482181421341872259/1482192203093905410/imagem.png"
