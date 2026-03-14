@@ -20,7 +20,15 @@ CONFIG_CALL = {
     "titulo": "Painel de Calls",
     "descricao": (
         "Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
-        "Escolha o tipo de call e depois selecione a quantidade de vagas."
+        "Escolha o tipo de call e depois selecione a quantidade de vagas.\n"
+        "Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
+        "Você pode escolher entre PVP, Trial, Leviathan ou Vulcão.\n"
+        "Caso queira jogar outro modo ou jogo, abra uma call de \"Jogando\".\n"
+        "Se deseja conversar com outros membros, vÃ¡ para â ãƒ»criar-call.\n"
+        "Evite abrir chamadas para conversar ou escutar mÃºsica. Utilize o canal adequado.\n"
+        "Evite criar muitas chamadas sem necessidade, pois isso pode resultar em puniÃ§Ãµes.\n"
+        "Caso haja algum erro ou dÃºvida, entre em contato com o suporte."
+    
     ),
     "cor": 0xFF0000,
     "imagem": "https://cdn.discordapp.com/attachments/1482181421341872259/1482192203093905410/imagem.png"
