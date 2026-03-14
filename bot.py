@@ -235,4 +235,5 @@ async def env_panel(interaction: discord.Interaction):
         return await interaction.response.send_message(f"âŒ Sem permissÃ£o.", ephemeral=True)
     await interaction.response.send_message("âš™ï¸ Setup:", view=SetupPanelView(bot), ephemeral=True)
 
-bot.run("MTQ4MTY2MzMzNDA0NTU4NTU1OQ.GNFvEj.jMAiTrPsm7VAQzgQP051E6Jsdhu6TBINtVLQYE")
+TOKEN = os.getenv("TOKEN")
+client.run(TOKEN)
