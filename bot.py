@@ -5,7 +5,7 @@ import asyncio
 import os
 
 RODAPE_TEXTO = "Drakion Call © | Todos os Direitos Reservados."
-RODAPE_ICONE = "https://cdn.discordapp.com/attachments/1482181421341872259/1482181591311581278/imagem.png"
+RODAPE_ICONE = "https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
 
 ID_CARGO_PERMISSAO = 1481089914522173520
 ID_CARGO_MEMBRO = 1481090300402204833
