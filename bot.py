@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from discord import app_commands
 from discord.ui import View, Select
 import asyncio
 import os
@@ -25,9 +24,9 @@ CONFIG_CALL = {
         ":island: ┃ Você pode escolher entre PVP, Trial, Leviathan ou Vulcão.\n"
         ":video_game: ┃ Caso queira jogar outro modo ou jogo, abra uma call de \"Jogando\".\n"
         ":speech_balloon: ┃ Se deseja conversar com outros membros, abra uma call de \"criar-call\".\n"
-        ":hammer_pick: ┃ Evite abrir chamadas para conversar ou escutar musica. Utilize o canal adequado.\n"
-        ":x: ┃ Evite criar muitas chamadas sem necessidade, pois isso pode resultar em punições.\n"
-        ":question: ┃ Caso haja algum erro ou duvida, entre em contato com o suporte."
+        ":hammer_pick: ┃ Evite abrir chamadas para conversar ou escutar musica.\n"
+        ":x: ┃ Evite criar muitas chamadas sem necessidade.\n"
+        ":question: ┃ Caso haja algum erro ou dúvida, contate o suporte."
     ),
     "cor": 0xFF0000,
     "imagem": "https://cdn.discordapp.com/attachments/1482181421341872259/1482192203093905410/imagem.png"
@@ -52,6 +51,7 @@ def get_channel_name(name):
         "Geral": "🔊》"
     }
     return f"{prefixes.get(name, '🔊》')}{name}"
+
 
 class ParticipantCountSelect(Select):
 
@@ -78,46 +78,16 @@ class ParticipantCountSelect(Select):
 
     async def callback(self, interaction: discord.Interaction):
 
-        await interaction.response.defer(ephemeral=True)
-
         if interaction.user.id in self.bot.user_calls:
-            return await interaction.followup.send(
+            await interaction.response.send_message(
                 "❌ Você já possui uma call ativa.",
                 ephemeral=True
             )
+            return
 
         limit = int(self.values[0])
 
         category = interaction.guild.get_channel(ID_CATEGORIA_CALL)
-
-        role_membro = interaction.guild.get_role(ID_CARGO_MEMBRO)
-
-        overwrites = {
-            interaction.guild.default_role: discord.PermissionOverwrite(connect=True, speak=True),
-            role_membro: discord.PermissionOverwrite(connect=True, speak=True)
-        }
-
-        for cargo_id in CARGOS_BYPASS_LIMITE:
-            role = interaction.guild.get_role(cargo_id)
-            if role:
-                overwrites[role] = discord.PermissionOverwrite(connect=True, speak=True)
-
-        channel = await interaction.guild.create_voice_channel(
-            name=get_channel_name(self.event_name),
-            category=category,
-            user_limit=limit,
-            overwrites=overwrites
-        )
-
-        self.bot.active_calls[channel.id] = interaction.user.id
-        self.bot.user_calls[interaction.user.id] = channel.id
-
-        await interaction.followup.send(
-            f"✅ Call criada: {channel.mention}\nEntre em **15 segundos** ou ela será deletada.",
-            ephemeral=True
-        )
-        category = interaction.guild.get_channel(ID_CATEGORIA_CALL)
-
         role_membro = interaction.guild.get_role(ID_CARGO_MEMBRO)
 
         overwrites = {
@@ -176,9 +146,9 @@ class EventCallView(View):
             discord.SelectOption(label="Jogando", emoji="🎮", value="Jogando")
         ]
     )
-    async def select_callback(self, interaction: discord.Interaction, select):
+    async def select_callback(self, interaction: discord.Interaction, select: discord.ui.Select):
 
-        view = View()
+        view = discord.ui.View()
         view.add_item(ParticipantCountSelect(select.values[0], self.bot))
 
         await interaction.response.send_message(
@@ -201,7 +171,7 @@ class MyBot(commands.Bot):
         self.add_view(EventCallView(self))
         await self.tree.sync()
 
-        print("✅ Bot online e comandos sincronizados")
+        print("✅ Bot online")
 
 
 bot = MyBot()
@@ -232,20 +202,19 @@ async def env_panel(interaction: discord.Interaction):
     cargo = interaction.guild.get_role(ID_CARGO_PERMISSAO)
 
     if cargo not in interaction.user.roles:
-        return await interaction.response.send_message(
+        await interaction.response.send_message(
             "❌ Você não tem permissão.",
             ephemeral=True
         )
-
-    cfg = CONFIG_CALL
+        return
 
     embed = discord.Embed(
-        title=cfg["titulo"],
-        description=cfg["descricao"],
-        color=cfg["cor"]
+        title=CONFIG_CALL["titulo"],
+        description=CONFIG_CALL["descricao"],
+        color=CONFIG_CALL["cor"]
     )
 
-    embed.set_image(url=cfg["imagem"])
+    embed.set_image(url=CONFIG_CALL["imagem"])
     embed.set_footer(text=RODAPE_TEXTO, icon_url=RODAPE_ICONE)
 
     await interaction.channel.send(
