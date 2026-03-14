@@ -19,15 +19,15 @@ CARGOS_BYPASS_LIMITE = [
 CONFIG_CALL = {
     "titulo": "Painel de Calls",
     "descricao": (
-        "Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
-        "Escolha o tipo de call e depois selecione a quantidade de vagas.\n"
-        "Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
-        "Você pode escolher entre PVP, Trial, Leviathan ou Vulcão.\n"
-        "Caso queira jogar outro modo ou jogo, abra uma call de \"Jogando\".\n"
-        "Se deseja conversar com outros membros, vÃ¡ para â ãƒ»criar-call.\n"
-        "Evite abrir chamadas para conversar ou escutar mÃºsica. Utilize o canal adequado.\n"
-        "Evite criar muitas chamadas sem necessidade, pois isso pode resultar em puniÃ§Ãµes.\n"
-        "Caso haja algum erro ou dÃºvida, entre em contato com o suporte."
+        ":fire: ┃ Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
+        ":mag_right: ┃ Escolha o tipo de call e depois selecione a quantidade de vagas.\n"
+        ":apple: ┃ Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
+        ":island: ┃ Você pode escolher entre PVP, Trial, Leviathan ou Vulcão.\n"
+        ":video_game: ┃ Caso queira jogar outro modo ou jogo, abra uma call de \"Jogando\".\n"
+        ":speech_balloon: ┃ Se deseja conversar com outros membros, abra uma call de \"criar-call".\n"
+        ":hammer_pick: ┃ Evite abrir chamadas para conversar ou escutar musica. Utilize o canal adequado.\n"
+        ":x: Evite ┃ criar muitas chamadas sem necessidade, pois isso pode resultar em punições.\n"
+        ":question: ┃ Caso haja algum erro ou duvida, entre em contato com o suporte."
     
     ),
     "cor": 0xFF0000,
