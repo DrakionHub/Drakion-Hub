@@ -24,7 +24,7 @@ CONFIG_CALL = {
         ":apple: ┃ Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
         ":island: ┃ Você pode escolher entre PVP, Trial, Leviathan ou Vulcão.\n"
         ":video_game: ┃ Caso queira jogar outro modo ou jogo, abra uma call de \"Jogando\".\n"
-        ":speech_balloon: ┃ Se deseja conversar com outros membros, abra uma call de \"criar-call".\n"
+        ":speech_balloon: ┃ Se deseja conversar com outros membros, abra uma call de \"criar-call\".\n"
         ":hammer_pick: ┃ Evite abrir chamadas para conversar ou escutar musica. Utilize o canal adequado.\n"
         ":x: Evite ┃ criar muitas chamadas sem necessidade, pois isso pode resultar em punições.\n"
         ":question: ┃ Caso haja algum erro ou duvida, entre em contato com o suporte."
