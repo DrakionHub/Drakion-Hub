@@ -3,6 +3,9 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ui import View, Select, Modal, TextInput
 import asyncio
+import discord
+import os
+from discord.ext import commands
 
 RODAPE_TEXTO = "NightShadow Â© | Todos os Direitos Reservados."
 RODAPE_ICONE = "https://cdn.discordapp.com/attachments/1344032026092900424/1344032107931897966/logo2.webp?ex=699d56b1&is=699c0531&hm=0ebb6d80238b833e4cdf354d3b78b0fa8764142673e4b147ea114177326bb3f2"
@@ -232,8 +235,10 @@ async def on_voice_state_update(member, before, after):
 async def env_panel(interaction: discord.Interaction):
     cargo = interaction.guild.get_role(ID_CARGO_PERMISSAO)
     if cargo not in interaction.user.roles:
-        return await interaction.response.send_message(f"âŒ Sem permissÃ£o.", ephemeral=True)
-    await interaction.response.send_message("âš™ï¸ Setup:", view=SetupPanelView(bot), ephemeral=True)
+        return await interaction.response.send_message("❌ Sem permissão.", ephemeral=True)
 
+    await interaction.response.send_message("⚙️ Setup:", view=SetupPanelView(bot), ephemeral=True)
+
+import os
 TOKEN = os.getenv("TOKEN")
-client.run(TOKEN)
+bot.run(TOKEN)
