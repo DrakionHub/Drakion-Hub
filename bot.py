@@ -4,34 +4,34 @@ from discord.ui import View, Select
 import asyncio
 import os
 
-RODAPE_TEXTO = "Drakion Call © | Todos os Direitos Reservados."
-RODAPE_ICONE = "https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
+FOOTER_TEXT = "Drakion Call © | All Rights Reserved."
+FOOTER_ICON = "https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
 
-ID_CARGO_PERMISSAO = 1482423776158154953
-ID_CARGO_MEMBRO = 1482425956466429973
-ID_CATEGORIA_CALL = 1482171487640223847
+ID_PERMISSION_ROLE = 1482423776158154953
+ID_MEMBER_ROLE = 1482425956466429973
+ID_CALL_CATEGORY = 1482171487640223847
 
-CARGOS_BYPASS_LIMITE = [
+BYPASS_LIMIT_ROLES = [
     1481089914522173520,
     1482423776158154953,
     1482425821460304144
 ]
 
-CONFIG_CALL = {
-    "titulo": "Painel de Calls",
-    "descricao": (
-        ":fire: ┃ Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
-        ":mag_right: ┃ Escolha o tipo de call e depois selecione a quantidade de vagas.\n"
-        ":apple: ┃ Crie uma chamada para realizar eventos de Blox Fruits com outros membros.\n"
-        ":island: ┃ Você pode escolher entre PVP, Trial, Leviathan ou Vulcão.\n"
-        ":video_game: ┃ Caso queira jogar outro modo ou jogo, abra uma call de \"Jogando\".\n"
-        ":speech_balloon: ┃ Se deseja conversar com outros membros, abra uma call de \"criar-call\".\n"
-        ":hammer_pick: ┃ Evite abrir chamadas para conversar ou escutar musica.\n"
-        ":x: ┃ Evite criar muitas chamadas sem necessidade.\n"
-        ":question: ┃ Caso haja algum erro ou dúvida, contate o suporte."
+CALL_CONFIG = {
+    "title": "Call Panel",
+    "description": (
+        "🔥 ┃ Create a call to organize **Blox Fruits** events with other members.\n"
+        "🔎 ┃ Choose the type of call and then select the number of slots.\n"
+        "🍎 ┃ Use calls to coordinate raids, bosses and activities.\n"
+        "🏝 ┃ You can choose between **PVP, Trial, Leviathan or Volcano**.\n"
+        "🎮 ┃ If you want to play another mode or game, open a **Gaming** call.\n"
+        "💬 ┃ If you just want to chat with other members, open a **General** call.\n"
+        "🛠 ┃ Avoid opening calls only to listen to music.\n"
+        "❌ ┃ Avoid creating unnecessary calls.\n"
+        "❓ ┃ If you encounter any issues, contact the support team."
     ),
-    "cor": 0xFF0000,
-    "imagem": "https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png"
+    "color": 0xFF0000,
+    "image": "https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png"
 }
 
 intents = discord.Intents.default()
@@ -46,11 +46,11 @@ def get_channel_name(name):
         "PVP": "🥊》",
         "Trial": "🌑》",
         "Leviathan": "🐉》",
-        "Vulcão": "🌋》",
-        "Eventos Marinhos": "🌊》",
-        "Jogando": "🎮》",
-        "Música": "🎶》",
-        "Geral": "🔊》"
+        "Volcano": "🌋》",
+        "Sea Events": "🌊》",
+        "Gaming": "🎮》",
+        "Music": "🎶》",
+        "General": "🔊》"
     }
     return f"{prefixes.get(name, '🔊》')}{name}"
 
@@ -62,19 +62,19 @@ class ParticipantCountSelect(Select):
         self.bot = bot
 
         options = [
-            discord.SelectOption(label="1 vaga", value="1"),
-            discord.SelectOption(label="2 vagas", value="2"),
-            discord.SelectOption(label="3 vagas", value="3"),
-            discord.SelectOption(label="4 vagas", value="4"),
-            discord.SelectOption(label="5 vagas", value="5"),
-            discord.SelectOption(label="10 vagas", value="10"),
-            discord.SelectOption(label="15 vagas", value="15"),
-            discord.SelectOption(label="20 vagas", value="20"),
-            discord.SelectOption(label="Sem limite", value="0")
+            discord.SelectOption(label="1 slot", value="1"),
+            discord.SelectOption(label="2 slots", value="2"),
+            discord.SelectOption(label="3 slots", value="3"),
+            discord.SelectOption(label="4 slots", value="4"),
+            discord.SelectOption(label="5 slots", value="5"),
+            discord.SelectOption(label="10 slots", value="10"),
+            discord.SelectOption(label="15 slots", value="15"),
+            discord.SelectOption(label="20 slots", value="20"),
+            discord.SelectOption(label="Unlimited", value="0")
         ]
 
         super().__init__(
-            placeholder="Escolha o limite de vagas",
+            placeholder="Choose the participant limit",
             options=options
         )
 
@@ -82,23 +82,23 @@ class ParticipantCountSelect(Select):
 
         if interaction.user.id in self.bot.user_calls:
             await interaction.response.send_message(
-                "❌ Você já possui uma call ativa.",
+                "❌ You already have an active call.",
                 ephemeral=True
             )
             return
 
         limit = int(self.values[0])
 
-        category = interaction.guild.get_channel(ID_CATEGORIA_CALL)
-        role_membro = interaction.guild.get_role(ID_CARGO_MEMBRO)
+        category = interaction.guild.get_channel(ID_CALL_CATEGORY)
+        role_member = interaction.guild.get_role(ID_MEMBER_ROLE)
 
         overwrites = {
             interaction.guild.default_role: discord.PermissionOverwrite(connect=True, speak=True),
-            role_membro: discord.PermissionOverwrite(connect=True, speak=True)
+            role_member: discord.PermissionOverwrite(connect=True, speak=True)
         }
 
-        for cargo_id in CARGOS_BYPASS_LIMITE:
-            role = interaction.guild.get_role(cargo_id)
+        for role_id in BYPASS_LIMIT_ROLES:
+            role = interaction.guild.get_role(role_id)
             if role:
                 overwrites[role] = discord.PermissionOverwrite(connect=True, speak=True)
 
@@ -113,7 +113,7 @@ class ParticipantCountSelect(Select):
         self.bot.user_calls[interaction.user.id] = channel.id
 
         await interaction.response.send_message(
-            f"✅ Call criada: {channel.mention}\nEntre em **15 segundos** ou ela será deletada.",
+            f"✅ Call created: {channel.mention}\nJoin within **15 seconds** or it will be deleted.",
             ephemeral=True
         )
 
@@ -135,17 +135,17 @@ class EventCallView(View):
         self.bot = bot
 
     @discord.ui.select(
-        placeholder="Escolha o tipo de call",
+        placeholder="Choose the type of call",
         custom_id="drakion_call_select",
         options=[
-            discord.SelectOption(label="Geral", emoji="🔊", value="Geral"),
-            discord.SelectOption(label="Música", emoji="🎶", value="Música"),
+            discord.SelectOption(label="General", emoji="🔊", value="General"),
+            discord.SelectOption(label="Music", emoji="🎶", value="Music"),
             discord.SelectOption(label="PVP", emoji="🥊", value="PVP"),
             discord.SelectOption(label="Trial", emoji="🌑", value="Trial"),
             discord.SelectOption(label="Leviathan", emoji="🐉", value="Leviathan"),
-            discord.SelectOption(label="Vulcão", emoji="🌋", value="Vulcão"),
-            discord.SelectOption(label="Eventos Marinhos", emoji="🌊", value="Eventos Marinhos"),
-            discord.SelectOption(label="Jogando", emoji="🎮", value="Jogando")
+            discord.SelectOption(label="Volcano", emoji="🌋", value="Volcano"),
+            discord.SelectOption(label="Sea Events", emoji="🌊", value="Sea Events"),
+            discord.SelectOption(label="Gaming", emoji="🎮", value="Gaming")
         ]
     )
     async def select_callback(self, interaction: discord.Interaction, select: discord.ui.Select):
@@ -154,7 +154,7 @@ class EventCallView(View):
         view.add_item(ParticipantCountSelect(select.values[0], self.bot))
 
         await interaction.response.send_message(
-            f"Quantas vagas para **{select.values[0]}**?",
+            f"How many slots for **{select.values[0]}**?",
             view=view,
             ephemeral=True
         )
@@ -173,7 +173,7 @@ class MyBot(commands.Bot):
         self.add_view(EventCallView(self))
         await self.tree.sync()
 
-        print("✅ Bot online")
+        print("✅ Bot is online")
 
 
 bot = MyBot()
@@ -198,25 +198,24 @@ async def on_voice_state_update(member, before, after):
                     pass
 
 
-@bot.tree.command(name="env_panel", description="Enviar painel de criação de calls")
-async def env_panel(interaction: discord.Interaction):
+@bot.tree.command(name="send_panel", description="Send the call creation panel")
+async def send_panel(interaction: discord.Interaction):
 
-    # 🔒 Verifica se tem o cargo permitido
-    if not any(role.id == ID_CARGO_PERMISSAO for role in interaction.user.roles):
+    if not any(role.id == ID_PERMISSION_ROLE for role in interaction.user.roles):
         await interaction.response.send_message(
-            "❌ Você não tem permissão para usar este comando.",
+            "❌ You do not have permission to use this command.",
             ephemeral=True
         )
         return
 
     embed = discord.Embed(
-        title=CONFIG_CALL["titulo"],
-        description=CONFIG_CALL["descricao"],
-        color=CONFIG_CALL["cor"]
+        title=CALL_CONFIG["title"],
+        description=CALL_CONFIG["description"],
+        color=CALL_CONFIG["color"]
     )
 
-    embed.set_image(url=CONFIG_CALL["imagem"])
-    embed.set_footer(text=RODAPE_TEXTO, icon_url=RODAPE_ICONE)
+    embed.set_image(url=CALL_CONFIG["image"])
+    embed.set_footer(text=FOOTER_TEXT, icon_url=FOOTER_ICON)
 
     await interaction.channel.send(
         embed=embed,
@@ -224,7 +223,7 @@ async def env_panel(interaction: discord.Interaction):
     )
 
     await interaction.response.send_message(
-        "✅ Painel enviado.",
+        "✅ Panel sent successfully.",
         ephemeral=True
     )
 
