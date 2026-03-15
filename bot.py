@@ -11,7 +11,6 @@ ID_PERMISSION_ROLE = 1482423776158154953
 ID_MEMBER_ROLE = 1482425956466429973
 ID_CALL_CATEGORY = 1482171487640223847
 
-# COLOQUE O ID DO SEU SERVIDOR AQUI
 GUILD_ID = 1481089628374171651
 
 BYPASS_LIMIT_ROLES = [
@@ -25,12 +24,8 @@ CALL_CONFIG = {
     "description": (
         "🔥 ┃ Create a call to organize **Blox Fruits** events with other members.\n"
         "🔎 ┃ Choose the type of call and then select the number of slots.\n"
-        "🍎 ┃ Use calls to coordinate raids, bosses and activities.\n"
-        "🏝 ┃ You can choose between **PVP, Trial, Leviathan or Volcano**.\n"
-        "🎮 ┃ If you want to play another mode or game, open a **Gaming** call.\n"
-        "💬 ┃ If you just want to chat with other members, open a **General** call.\n"
-        "🛠 ┃ Avoid opening calls only to listen to music.\n"
-        "❌ ┃ Avoid creating unnecessary calls.\n"
+        "🎮 ┃ You can open Gaming, PVP, Leviathan, Trial and more.\n"
+        "💬 ┃ If you just want to chat, open a **General** call.\n"
         "❓ ┃ If you encounter any issues, contact the support team."
     ),
     "color": 0xFF0000,
@@ -76,10 +71,7 @@ class ParticipantCountSelect(Select):
             discord.SelectOption(label="Unlimited", value="0")
         ]
 
-        super().__init__(
-            placeholder="Choose the participant limit",
-            options=options
-        )
+        super().__init__(placeholder="Choose the participant limit", options=options)
 
     async def callback(self, interaction: discord.Interaction):
 
@@ -116,19 +108,9 @@ class ParticipantCountSelect(Select):
         self.bot.user_calls[interaction.user.id] = channel.id
 
         await interaction.response.send_message(
-            f"✅ Call created: {channel.mention}\nJoin within **15 seconds** or it will be deleted.",
+            f"✅ Call created: {channel.mention}",
             ephemeral=True
         )
-
-        await asyncio.sleep(15)
-
-        if len(channel.members) == 0:
-            try:
-                owner = self.bot.active_calls.pop(channel.id)
-                self.bot.user_calls.pop(owner)
-                await channel.delete()
-            except:
-                pass
 
 
 class EventCallView(View):
@@ -139,16 +121,15 @@ class EventCallView(View):
 
     @discord.ui.select(
         placeholder="Choose the type of call",
-        custom_id="drakion_call_select",
         options=[
-            discord.SelectOption(label="General", emoji="🔊", value="General"),
-            discord.SelectOption(label="Music", emoji="🎶", value="Music"),
-            discord.SelectOption(label="PVP", emoji="🥊", value="PVP"),
-            discord.SelectOption(label="Trial", emoji="🌑", value="Trial"),
-            discord.SelectOption(label="Leviathan", emoji="🐉", value="Leviathan"),
-            discord.SelectOption(label="Volcano", emoji="🌋", value="Volcano"),
-            discord.SelectOption(label="Sea Events", emoji="🌊", value="Sea Events"),
-            discord.SelectOption(label="Gaming", emoji="🎮", value="Gaming")
+            discord.SelectOption(label="General", emoji="🔊"),
+            discord.SelectOption(label="Music", emoji="🎶"),
+            discord.SelectOption(label="PVP", emoji="🥊"),
+            discord.SelectOption(label="Trial", emoji="🌑"),
+            discord.SelectOption(label="Leviathan", emoji="🐉"),
+            discord.SelectOption(label="Volcano", emoji="🌋"),
+            discord.SelectOption(label="Sea Events", emoji="🌊"),
+            discord.SelectOption(label="Gaming", emoji="🎮")
         ]
     )
     async def select_callback(self, interaction: discord.Interaction, select: discord.ui.Select):
@@ -165,18 +146,16 @@ class EventCallView(View):
 
 class EmbedModal(Modal, title="Create Embed"):
 
-    embed_text = TextInput(
-        label="Embed Text",
+    text = TextInput(
+        label="Embed Message",
         style=discord.TextStyle.paragraph,
-        placeholder="Write the embed message here...",
-        required=True,
-        max_length=2000
+        placeholder="Write your embed message here..."
     )
 
     async def on_submit(self, interaction: discord.Interaction):
 
         embed = discord.Embed(
-            description=self.embed_text.value,
+            description=self.text.value,
             color=0xFF0000
         )
 
@@ -185,7 +164,7 @@ class EmbedModal(Modal, title="Create Embed"):
         await interaction.channel.send(embed=embed)
 
         await interaction.response.send_message(
-            "✅ Embed sent successfully.",
+            "✅ Embed sent!",
             ephemeral=True
         )
 
@@ -204,31 +183,16 @@ class MyBot(commands.Bot):
 
         guild = discord.Object(id=GUILD_ID)
 
+        # copia comandos globais para a guild
+        self.tree.copy_global_to(guild=guild)
+
+        # sincroniza
         await self.tree.sync(guild=guild)
 
-        print("✅ Bot is online")
+        print("✅ Bot Online")
 
 
 bot = MyBot()
-
-
-@bot.event
-async def on_voice_state_update(member, before, after):
-
-    if before.channel and before.channel.id in bot.active_calls:
-
-        if len(before.channel.members) == 0:
-
-            await asyncio.sleep(5)
-
-            if len(before.channel.members) == 0:
-
-                try:
-                    owner = bot.active_calls.pop(before.channel.id)
-                    bot.user_calls.pop(owner)
-                    await before.channel.delete()
-                except:
-                    pass
 
 
 @bot.tree.command(name="send_panel", description="Send the call creation panel")
@@ -236,7 +200,7 @@ async def send_panel(interaction: discord.Interaction):
 
     if not any(role.id == ID_PERMISSION_ROLE for role in interaction.user.roles):
         await interaction.response.send_message(
-            "❌ You do not have permission to use this command.",
+            "❌ You don't have permission.",
             ephemeral=True
         )
         return
@@ -250,23 +214,17 @@ async def send_panel(interaction: discord.Interaction):
     embed.set_image(url=CALL_CONFIG["image"])
     embed.set_footer(text=FOOTER_TEXT, icon_url=FOOTER_ICON)
 
-    await interaction.channel.send(
-        embed=embed,
-        view=EventCallView(bot)
-    )
+    await interaction.channel.send(embed=embed, view=EventCallView(bot))
 
-    await interaction.response.send_message(
-        "✅ Panel sent successfully.",
-        ephemeral=True
-    )
+    await interaction.response.send_message("✅ Panel sent!", ephemeral=True)
 
 
-@bot.tree.command(name="embed", description="Create an embed message")
+@bot.tree.command(name="embed", description="Create an embed")
 async def embed(interaction: discord.Interaction):
 
     if not any(role.id == ID_PERMISSION_ROLE for role in interaction.user.roles):
         await interaction.response.send_message(
-            "❌ You do not have permission to use this command.",
+            "❌ You don't have permission.",
             ephemeral=True
         )
         return
