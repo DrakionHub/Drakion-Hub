@@ -183,7 +183,7 @@ async def send_panel(interaction: discord.Interaction):
 
     embed = discord.Embed(
         title="Call Panel",
-        description=""🔥 ┃ Create a call to organize Blox Fruits events with other members.\n"
+        description="🔥 ┃ Create a call to organize Blox Fruits events with other members.\n"
 "🔎 ┃ Choose the type of call and then select the number of slots.\n"
 "🍎 ┃ Use calls to coordinate raids, bosses and activities.\n"
 "🏝 ┃ You can choose between PVP, Trial, Leviathan or Volcano.\n"
@@ -191,7 +191,7 @@ async def send_panel(interaction: discord.Interaction):
 "💬 ┃ If you just want to chat with other members, open a General call.\n"
 "🛠 ┃ Avoid opening calls only to listen to music.\n"
 "❌ ┃ Avoid creating unnecessary calls.\n"
-"❓ ┃ If you encounter any issues, contact the support team.\n"",
+"❓ ┃ If you encounter any issues, contact the support team.",
         color=0xff0000
     )
 
