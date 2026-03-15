@@ -36,6 +36,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.voice_states = True
 intents.guilds = True
+intents.message_content = True
 
 
 def get_channel_name(name):
@@ -70,7 +71,11 @@ class ParticipantCountSelect(Select):
             discord.SelectOption(label="Unlimited", value="0")
         ]
 
-        super().__init__(placeholder="Choose the participant limit", options=options)
+        super().__init__(
+            placeholder="Choose the participant limit",
+            options=options,
+            custom_id="participant_limit_select"
+        )
 
     async def callback(self, interaction: discord.Interaction):
 
@@ -120,6 +125,7 @@ class EventCallView(View):
 
     @discord.ui.select(
         placeholder="Choose the type of call",
+        custom_id="call_type_select",
         options=[
             discord.SelectOption(label="General", emoji="🔊"),
             discord.SelectOption(label="Music", emoji="🎶"),
@@ -133,7 +139,7 @@ class EventCallView(View):
     )
     async def select_callback(self, interaction: discord.Interaction, select: discord.ui.Select):
 
-        view = discord.ui.View()
+        view = View()
         view.add_item(ParticipantCountSelect(select.values[0], self.bot))
 
         await interaction.response.send_message(
