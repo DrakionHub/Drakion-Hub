@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from discord.ui import View, Select
+from discord.ui import View, Select, Modal, TextInput
 import asyncio
 import os
 
@@ -10,6 +10,9 @@ FOOTER_ICON = "https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd6
 ID_PERMISSION_ROLE = 1482423776158154953
 ID_MEMBER_ROLE = 1482425956466429973
 ID_CALL_CATEGORY = 1482171487640223847
+
+# COLOQUE O ID DO SEU SERVIDOR AQUI
+GUILD_ID = 1481089628374171651
 
 BYPASS_LIMIT_ROLES = [
     1481089914522173520,
@@ -160,6 +163,33 @@ class EventCallView(View):
         )
 
 
+class EmbedModal(Modal, title="Create Embed"):
+
+    embed_text = TextInput(
+        label="Embed Text",
+        style=discord.TextStyle.paragraph,
+        placeholder="Write the embed message here...",
+        required=True,
+        max_length=2000
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+
+        embed = discord.Embed(
+            description=self.embed_text.value,
+            color=0xFF0000
+        )
+
+        embed.set_footer(text=FOOTER_TEXT, icon_url=FOOTER_ICON)
+
+        await interaction.channel.send(embed=embed)
+
+        await interaction.response.send_message(
+            "✅ Embed sent successfully.",
+            ephemeral=True
+        )
+
+
 class MyBot(commands.Bot):
 
     def __init__(self):
@@ -171,7 +201,10 @@ class MyBot(commands.Bot):
     async def setup_hook(self):
 
         self.add_view(EventCallView(self))
-        await self.tree.sync()
+
+        guild = discord.Object(id=GUILD_ID)
+
+        await self.tree.sync(guild=guild)
 
         print("✅ Bot is online")
 
@@ -226,6 +259,19 @@ async def send_panel(interaction: discord.Interaction):
         "✅ Panel sent successfully.",
         ephemeral=True
     )
+
+
+@bot.tree.command(name="embed", description="Create an embed message")
+async def embed(interaction: discord.Interaction):
+
+    if not any(role.id == ID_PERMISSION_ROLE for role in interaction.user.roles):
+        await interaction.response.send_message(
+            "❌ You do not have permission to use this command.",
+            ephemeral=True
+        )
+        return
+
+    await interaction.response.send_modal(EmbedModal())
 
 
 TOKEN = os.getenv("TOKEN")
