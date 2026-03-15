@@ -1,9 +1,10 @@
 import discord
 from discord.ext import commands
 from discord.ui import View, Select, Modal, TextInput
-from discord import app_commands
 import asyncio
 import os
+
+TOKEN = os.getenv("TOKEN")
 
 FOOTER_TEXT = "Drakion Call © | All Rights Reserved."
 FOOTER_ICON = "https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd65da6b783a0f96e929b49.png?size=2048"
@@ -12,25 +13,6 @@ ID_PERMISSION_ROLE = 1482423776158154953
 ID_MEMBER_ROLE = 1482425956466429973
 ID_CALL_CATEGORY = 1482171487640223847
 GUILD_ID = 1481089628374171651
-
-BYPASS_LIMIT_ROLES = [
-    1481089914522173520,
-    1482423776158154953,
-    1482425821460304144
-]
-
-CALL_CONFIG = {
-    "title": "Call Panel",
-    "description": (
-        "🔥 ┃ Create a call to organize **Blox Fruits** events with other members.\n"
-        "🔎 ┃ Choose the type of call and then select the number of slots.\n"
-        "🎮 ┃ You can open Gaming, PVP, Leviathan, Trial and more.\n"
-        "💬 ┃ If you just want to chat, open a **General** call.\n"
-        "❓ ┃ If you encounter any issues, contact the support team."
-    ),
-    "color": 0xFF0000,
-    "image": "https://cdn.discordapp.com/attachments/1482181421341872259/1482192202976202783/output.png"
-}
 
 intents = discord.Intents.default()
 intents.members = True
@@ -50,31 +32,31 @@ def get_channel_name(name):
         "Music": "🎶》",
         "General": "🔊》"
     }
-    return f"{prefixes.get(name, '🔊》')}{name}"
+    return f"{prefixes.get(name,'🔊》')}{name}"
 
 
-class ParticipantCountSelect(Select):
+class ParticipantSelect(Select):
 
     def __init__(self, event_name, bot):
         self.event_name = event_name
         self.bot = bot
 
         options = [
-            discord.SelectOption(label="1 slot", value="1"),
-            discord.SelectOption(label="2 slots", value="2"),
-            discord.SelectOption(label="3 slots", value="3"),
-            discord.SelectOption(label="4 slots", value="4"),
-            discord.SelectOption(label="5 slots", value="5"),
-            discord.SelectOption(label="10 slots", value="10"),
-            discord.SelectOption(label="15 slots", value="15"),
-            discord.SelectOption(label="20 slots", value="20"),
+            discord.SelectOption(label="1", value="1"),
+            discord.SelectOption(label="2", value="2"),
+            discord.SelectOption(label="3", value="3"),
+            discord.SelectOption(label="4", value="4"),
+            discord.SelectOption(label="5", value="5"),
+            discord.SelectOption(label="10", value="10"),
+            discord.SelectOption(label="15", value="15"),
+            discord.SelectOption(label="20", value="20"),
             discord.SelectOption(label="Unlimited", value="0")
         ]
 
         super().__init__(
-            placeholder="Choose the participant limit",
+            placeholder="Select slot amount",
             options=options,
-            custom_id="participant_limit_select"
+            custom_id="slot_select"
         )
 
     async def callback(self, interaction: discord.Interaction):
@@ -89,26 +71,13 @@ class ParticipantCountSelect(Select):
         limit = int(self.values[0])
 
         category = interaction.guild.get_channel(ID_CALL_CATEGORY)
-        role_member = interaction.guild.get_role(ID_MEMBER_ROLE)
-
-        overwrites = {
-            interaction.guild.default_role: discord.PermissionOverwrite(connect=True, speak=True),
-            role_member: discord.PermissionOverwrite(connect=True, speak=True)
-        }
-
-        for role_id in BYPASS_LIMIT_ROLES:
-            role = interaction.guild.get_role(role_id)
-            if role:
-                overwrites[role] = discord.PermissionOverwrite(connect=True, speak=True)
 
         channel = await interaction.guild.create_voice_channel(
             name=get_channel_name(self.event_name),
             category=category,
-            user_limit=limit,
-            overwrites=overwrites
+            user_limit=limit
         )
 
-        self.bot.active_calls[channel.id] = interaction.user.id
         self.bot.user_calls[interaction.user.id] = channel.id
 
         await interaction.response.send_message(
@@ -117,14 +86,14 @@ class ParticipantCountSelect(Select):
         )
 
 
-class EventCallView(View):
+class CallView(View):
 
     def __init__(self, bot):
         super().__init__(timeout=None)
         self.bot = bot
 
     @discord.ui.select(
-        placeholder="Choose the type of call",
+        placeholder="Select call type",
         custom_id="call_type_select",
         options=[
             discord.SelectOption(label="General", emoji="🔊"),
@@ -140,10 +109,10 @@ class EventCallView(View):
     async def select_callback(self, interaction: discord.Interaction, select: discord.ui.Select):
 
         view = View()
-        view.add_item(ParticipantCountSelect(select.values[0], self.bot))
+        view.add_item(ParticipantSelect(select.values[0], self.bot))
 
         await interaction.response.send_message(
-            f"How many slots for **{select.values[0]}**?",
+            "Select slot amount:",
             view=view,
             ephemeral=True
         )
@@ -152,16 +121,15 @@ class EventCallView(View):
 class EmbedModal(Modal, title="Create Embed"):
 
     message = TextInput(
-        label="Embed Message",
-        style=discord.TextStyle.paragraph,
-        placeholder="Write the embed message here..."
+        label="Embed text",
+        style=discord.TextStyle.paragraph
     )
 
     async def on_submit(self, interaction: discord.Interaction):
 
         embed = discord.Embed(
             description=self.message.value,
-            color=0xFF0000
+            color=0xff0000
         )
 
         embed.set_footer(text=FOOTER_TEXT, icon_url=FOOTER_ICON)
@@ -169,7 +137,7 @@ class EmbedModal(Modal, title="Create Embed"):
         await interaction.channel.send(embed=embed)
 
         await interaction.response.send_message(
-            "✅ Embed sent!",
+            "✅ Embed sent.",
             ephemeral=True
         )
 
@@ -177,53 +145,76 @@ class EmbedModal(Modal, title="Create Embed"):
 class MyBot(commands.Bot):
 
     def __init__(self):
-        super().__init__(command_prefix="!", intents=intents)
-        self.active_calls = {}
+        super().__init__(
+            command_prefix="!",
+            intents=intents
+        )
+
         self.user_calls = {}
 
     async def setup_hook(self):
-        self.add_view(EventCallView(self))
-        await self.tree.sync()
+
+        self.add_view(CallView(self))
+
+        guild = discord.Object(id=GUILD_ID)
+
+        self.tree.copy_global_to(guild=guild)
+        await self.tree.sync(guild=guild)
+
+        print("✅ Commands synced")
 
 
 bot = MyBot()
 
 
-@app_commands.command(name="send_panel", description="Send the call creation panel")
-@app_commands.guilds(discord.Object(id=GUILD_ID))
+@bot.tree.command(
+    name="send_panel",
+    description="Send call panel",
+    guild=discord.Object(id=GUILD_ID)
+)
 async def send_panel(interaction: discord.Interaction):
 
     if not any(role.id == ID_PERMISSION_ROLE for role in interaction.user.roles):
-        await interaction.response.send_message("❌ No permission.", ephemeral=True)
+        await interaction.response.send_message(
+            "❌ No permission",
+            ephemeral=True
+        )
         return
 
     embed = discord.Embed(
-        title=CALL_CONFIG["title"],
-        description=CALL_CONFIG["description"],
-        color=CALL_CONFIG["color"]
+        title="Call Panel",
+        description="Create a voice call for events.",
+        color=0xff0000
     )
 
-    embed.set_image(url=CALL_CONFIG["image"])
     embed.set_footer(text=FOOTER_TEXT, icon_url=FOOTER_ICON)
 
-    await interaction.channel.send(embed=embed, view=EventCallView(bot))
-    await interaction.response.send_message("✅ Panel sent.", ephemeral=True)
+    await interaction.channel.send(
+        embed=embed,
+        view=CallView(bot)
+    )
+
+    await interaction.response.send_message(
+        "✅ Panel sent",
+        ephemeral=True
+    )
 
 
-@app_commands.command(name="embed", description="Create an embed")
-@app_commands.guilds(discord.Object(id=GUILD_ID))
+@bot.tree.command(
+    name="embed",
+    description="Create embed",
+    guild=discord.Object(id=GUILD_ID)
+)
 async def embed(interaction: discord.Interaction):
 
     if not any(role.id == ID_PERMISSION_ROLE for role in interaction.user.roles):
-        await interaction.response.send_message("❌ No permission.", ephemeral=True)
+        await interaction.response.send_message(
+            "❌ No permission",
+            ephemeral=True
+        )
         return
 
     await interaction.response.send_modal(EmbedModal())
 
 
-bot.tree.add_command(send_panel)
-bot.tree.add_command(embed)
-
-
-TOKEN = os.getenv("TOKEN")
 bot.run(TOKEN)
