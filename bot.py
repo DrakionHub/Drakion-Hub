@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from discord.ui import View, Select, Modal, TextInput
+from discord import app_commands
 import asyncio
 import os
 
@@ -10,7 +11,6 @@ FOOTER_ICON = "https://cdn.discordapp.com/icons/1481089628374171651/de6d926a6fd6
 ID_PERMISSION_ROLE = 1482423776158154953
 ID_MEMBER_ROLE = 1482425956466429973
 ID_CALL_CATEGORY = 1482171487640223847
-
 GUILD_ID = 1481089628374171651
 
 BYPASS_LIMIT_ROLES = [
@@ -35,7 +35,6 @@ CALL_CONFIG = {
 intents = discord.Intents.default()
 intents.members = True
 intents.voice_states = True
-intents.message_content = True
 intents.guilds = True
 
 
@@ -146,16 +145,16 @@ class EventCallView(View):
 
 class EmbedModal(Modal, title="Create Embed"):
 
-    text = TextInput(
+    message = TextInput(
         label="Embed Message",
         style=discord.TextStyle.paragraph,
-        placeholder="Write your embed message here..."
+        placeholder="Write the embed message here..."
     )
 
     async def on_submit(self, interaction: discord.Interaction):
 
         embed = discord.Embed(
-            description=self.text.value,
+            description=self.message.value,
             color=0xFF0000
         )
 
@@ -173,36 +172,23 @@ class MyBot(commands.Bot):
 
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents)
-
         self.active_calls = {}
         self.user_calls = {}
 
     async def setup_hook(self):
-
         self.add_view(EventCallView(self))
-
-        guild = discord.Object(id=GUILD_ID)
-
-        # copia comandos globais para a guild
-        self.tree.copy_global_to(guild=guild)
-
-        # sincroniza
-        await self.tree.sync(guild=guild)
-
-        print("✅ Bot Online")
+        await self.tree.sync()
 
 
 bot = MyBot()
 
 
-@bot.tree.command(name="send_panel", description="Send the call creation panel")
+@app_commands.command(name="send_panel", description="Send the call creation panel")
+@app_commands.guilds(discord.Object(id=GUILD_ID))
 async def send_panel(interaction: discord.Interaction):
 
     if not any(role.id == ID_PERMISSION_ROLE for role in interaction.user.roles):
-        await interaction.response.send_message(
-            "❌ You don't have permission.",
-            ephemeral=True
-        )
+        await interaction.response.send_message("❌ No permission.", ephemeral=True)
         return
 
     embed = discord.Embed(
@@ -215,21 +201,22 @@ async def send_panel(interaction: discord.Interaction):
     embed.set_footer(text=FOOTER_TEXT, icon_url=FOOTER_ICON)
 
     await interaction.channel.send(embed=embed, view=EventCallView(bot))
+    await interaction.response.send_message("✅ Panel sent.", ephemeral=True)
 
-    await interaction.response.send_message("✅ Panel sent!", ephemeral=True)
 
-
-@bot.tree.command(name="embed", description="Create an embed")
+@app_commands.command(name="embed", description="Create an embed")
+@app_commands.guilds(discord.Object(id=GUILD_ID))
 async def embed(interaction: discord.Interaction):
 
     if not any(role.id == ID_PERMISSION_ROLE for role in interaction.user.roles):
-        await interaction.response.send_message(
-            "❌ You don't have permission.",
-            ephemeral=True
-        )
+        await interaction.response.send_message("❌ No permission.", ephemeral=True)
         return
 
     await interaction.response.send_modal(EmbedModal())
+
+
+bot.tree.add_command(send_panel)
+bot.tree.add_command(embed)
 
 
 TOKEN = os.getenv("TOKEN")
